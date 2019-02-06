@@ -3,6 +3,11 @@ import cv2
 import random
 import sys
 from argparse import ArgumentParser
+import os
+
+if os.name == 'nt':
+    import ctypes
+
 
 parser = ArgumentParser(description='Encrypt image with code')
 
@@ -28,7 +33,11 @@ def show_image(img, scale=args.factor):
     height, width = img.shape[:2]
     cv2.namedWindow('image', cv2.WINDOW_NORMAL)
     cv2.resizeWindow('image', int(width / scale), int(height / scale))
-    cv2.moveWindow('image', 100, 100)
+    if os.name == 'nt':
+        cv2.moveWindow('image', int(ctypes.windll.user32.GetSystemMetrics(
+            0)/2)-int((width / scale)/2), int(ctypes.windll.user32.GetSystemMetrics(1)/2) - int((height / scale)/2))
+    else:
+        cv2.moveWindow('image', 400, 100)
     cv2.imshow('image', img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
