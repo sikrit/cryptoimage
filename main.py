@@ -38,6 +38,7 @@ def encrypt(seed, file_name, save_name=args.output):
     img_show = cv2.imread(file_name, args.color)
 
     height, width = img_show.shape[:2]
+    blank_image = np.zeros(img_show.shape, np.uint8)
 
     print("{} - Height : {}, Width : {}".format(
         args.decrypt, height, width))
@@ -54,13 +55,13 @@ def encrypt(seed, file_name, save_name=args.output):
     tmp = 0
     for x in range(height):
         for y in range(width):
-            img_show[x, y] = myPixels[tmp]
+            blank_image[x, y] = myPixels[tmp]
             tmp += 1
     if args.output:
-        cv2.imwrite(save_name, img_show, [
+        cv2.imwrite(save_name, blank_image, [
                     cv2.IMWRITE_PNG_COMPRESSION, 0, cv2.IMWRITE_JPEG_QUALITY, 100])
         print("Saved as {}".format(args.output))
-    return img_show
+    return blank_image
 
 
 def decrypt(seed, file_name, save_name=args.output):
