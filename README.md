@@ -1,3 +1,8 @@
+## Grid support
+Custom block(pixel) size!
+
+---
+
 This script is very simple, it just shuffles pixels in image using your seed, so to decrypt image you need to know seed. Thats all
 
 ---
@@ -6,7 +11,7 @@ This script is very simple, it just shuffles pixels in image using your seed, so
 ## Usage
 ```
  main.py [-e file | -d file] [-o filename] [-f output on screen scale]
-               [-c color] -s SEED
+               [-c color] -s SEED [-p PIXEL BLOCK SIZE]
  ```
  
  
