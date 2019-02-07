@@ -20,6 +20,8 @@ parser.add_argument('-o', '--output', type=str,
 parser.add_argument('-f', '--factor', type=int, default=1, help='Scale factor')
 parser.add_argument('-c', '--color', type=int, default=-
                     1, help='<0 RGBA, 0 greyscale, >0 RGB')
+parser.add_argument('-p', '--pixel', type=int,
+                    default=1, help='Pixel block size')
 
 parser.add_argument('-s', '--seed', type=str, help='Seed', required=True)
 
@@ -52,20 +54,28 @@ def encrypt(seed, file_name, save_name=args.output):
     print("{} - Height : {}, Width : {}".format(
         args.decrypt, height, width))
 
-    myPixels = []
-
-    for x in range(height):
-        for y in range(width):
-            myPixels.append(img_show[x, y])
+    myBlocks = []
+    for blockX in range(int(width / args.pixel)):
+        for blockY in range(int(height / args.pixel)):
+            tmp = []
+            for x in range(blockX*args.pixel, (blockX+1)*args.pixel):
+                for y in range(args.pixel*blockY, args.pixel*(blockY+1)):
+                    tmp.append(img_show[y, x])
+            myBlocks.append(tmp)
     print("Pixels loaded into list;")
     random.seed(seed)
-    random.shuffle(myPixels)
+    random.shuffle(myBlocks)
     print("Shuffled with seed {}".format(args.seed))
-    tmp = 0
-    for x in range(height):
-        for y in range(width):
-            blank_image[x, y] = myPixels[tmp]
-            tmp += 1
+    blockId = -1
+    pixelId = 0
+    for blockX in range(int(width / args.pixel)):
+        for blockY in range(int(height / args.pixel)):
+            blockId += 1
+            pixelId = 0
+            for x in range(args.pixel*blockX, args.pixel*(blockX+1)):
+                for y in range(args.pixel*blockY, args.pixel*(blockY+1)):
+                    blank_image[y, x] = myBlocks[blockId][pixelId]
+                    pixelId += 1
     if args.output:
         cv2.imwrite(save_name, blank_image, [
                     cv2.IMWRITE_PNG_COMPRESSION, 0, cv2.IMWRITE_JPEG_QUALITY, 100])
@@ -82,26 +92,34 @@ def decrypt(seed, file_name, save_name=args.output):
     print("{} - Height : {}, Width : {}".format(
         args.decrypt, height, width))
 
-    myPixels = []
-
-    for x in range(height):
-        for y in range(width):
-            myPixels.append(img_show[x, y])
+    myBlocks = []
+    for blockX in range(int(width / args.pixel)):
+        for blockY in range(int(height / args.pixel)):
+            tmp = []
+            for x in range(blockX*args.pixel, (blockX+1)*args.pixel):
+                for y in range(args.pixel*blockY, args.pixel*(blockY+1)):
+                    tmp.append(img_show[y, x])
+            myBlocks.append(tmp)
     print("Pixels loaded into list;")
 
-    tmp = 0
-    Decrypted = list(range(len(myPixels)))
+    Decrypted = list(range(len(myBlocks)))
     random.seed(seed)
     random.shuffle(Decrypted)
 
-    originalList = [0]*len(myPixels)   # empty list, but the right length
+    originalList = [0]*len(myBlocks)   # empty list, but the right length
     for index, originalIndex in enumerate(Decrypted):
-        originalList[originalIndex] = myPixels[index]
+        originalList[originalIndex] = myBlocks[index]
 
-    for x in range(height):
-        for y in range(width):
-            blank_image[x, y] = originalList[tmp]
-            tmp += 1
+    blockId = -1
+    pixelId = 0
+    for blockX in range(int(width / args.pixel)):
+        for blockY in range(int(height / args.pixel)):
+            blockId += 1
+            pixelId = 0
+            for x in range(args.pixel*blockX, args.pixel*(blockX+1)):
+                for y in range(args.pixel*blockY, args.pixel*(blockY+1)):
+                    blank_image[y, x] = originalList[blockId][pixelId]
+                    pixelId += 1
     print("Restored original list of pixels with seed {}".format(args.seed))
     if args.output:
         cv2.imwrite(save_name, blank_image, [
