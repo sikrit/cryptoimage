@@ -1,3 +1,7 @@
 *.png
 test.py
 *.zip
+*.mp4
+.*jpg
+*.exe
+*.mp3
